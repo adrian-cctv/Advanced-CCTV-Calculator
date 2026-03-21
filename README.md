@@ -30,4 +30,4 @@ Most storage calculators overlook the "Binary Gap" and physical chassis constrai
 *This tool is a design aid provided for professional integrators. While it accounts for binary conversion and RAID overhead, final storage specifications should always be verified against manufacturer-specific design tools to account for specific VMS and hardware throughput limitations.*
 
 ---
-**Developed by Adrian
+**Developed by Adrian C.
