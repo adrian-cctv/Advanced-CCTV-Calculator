@@ -2,7 +2,7 @@
 > **Enterprise Storage & Design Utilities for the Security Industry.**
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
-[![Axis-Ready](https://img.shields.io/badge/Hardware-Axis%20Optimized-orange)](https://www.axis.com)
+
 
 Most storage calculators overlook the "Binary Gap" and physical chassis constraints. This tool is built to bridge the gap between **Sales Estimates** and **Engineering Reality**.
 
