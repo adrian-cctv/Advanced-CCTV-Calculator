@@ -3,6 +3,8 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 
+Available to Play Here : https://adrian-cctv.github.io/Advanced-CCTV-Calculator/
+
 
 Most storage calculators overlook the "Binary Gap" and physical chassis constraints. This tool is built to bridge the gap between **Sales Estimates** and **Engineering Reality**.
 
