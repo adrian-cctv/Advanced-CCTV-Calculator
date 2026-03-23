@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CCTV Storage Architect | v3.7</title>
+    <title>CCTV Storage Architect | v3.7.1</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700&family=JetBrains+Mono&display=swap');
@@ -978,59 +978,140 @@ ${exceeds ? '⚠️ WARNING: More drives needed than available bays!\n' : ''}
         }
         
         function calcTargetMode() {
-            let target = parseFloat(document.getElementById('targetCapacity').value) || 0;
-            if (document.getElementById('targetUnit').value === 'TB') target *= 0.90949;
-            const raid = document.getElementById('targetRaidLevel').value;
-            const hdd = parseFloat(document.getElementById('targetHddSize').value) * 0.90949;
-            const hotSpares = parseInt(document.getElementById('targetHotSpares').value) || 0;
-            const coldSpares = parseInt(document.getElementById('targetColdSpares').value) || 0;
-            const chassisBays = getChassisBays();
-            const totalBays = chassisBays.reduce((a,b)=>a+b,0);
-            
-            let drives = calculateDrivesForCapacity(target, raid, hdd, totalBays);
-            const totalDrives = drives + hotSpares + coldSpares;
-            const usable = calculateRAIDCapacity(raid, drives, hdd);
-            const rawTotal = drives * hdd;
-            const exceeds = totalDrives > totalBays;
-            
-            let report = `[ STORAGE DESIGN REPORT ]
+    let target = parseFloat(document.getElementById('targetCapacity').value) || 0;
+    if (document.getElementById('targetUnit').value === 'TB') target *= 0.90949;
+    const raid = document.getElementById('targetRaidLevel').value;
+    const hddLabel = parseFloat(document.getElementById('targetHddSize').value);
+    const hddTiB = hddLabel * 0.90949;
+    const hotSpares = parseInt(document.getElementById('targetHotSpares').value) || 0;
+    const coldSpares = parseInt(document.getElementById('targetColdSpares').value) || 0;
+    const chassisBaysList = getChassisBays();
+    const totalBays = chassisBaysList.reduce((a,b) => a + b, 0);
+    const distributionMode = document.getElementById('distributionMode').value;
+
+    // Calculate number of data drives required (without spares)
+    let dataDrives = 0;
+    if (raid === 'JBOD' || raid === 'RAID0') {
+        dataDrives = Math.ceil(target / hddTiB);
+    } else if (raid === 'RAID1') {
+        dataDrives = Math.ceil(target / hddTiB) * 2;
+    } else if (raid === 'RAID5') {
+        dataDrives = Math.ceil(target / hddTiB) + 1;
+    } else if (raid === 'RAID6') {
+        dataDrives = Math.ceil(target / hddTiB) + 2;
+    } else if (raid === 'RAID10') {
+        let drives = Math.ceil(target / (hddTiB * 0.5));
+        drives = Math.max(4, drives);
+        if (drives % 2 !== 0) drives++;
+        dataDrives = drives;
+    }
+    const totalSpares = hotSpares + coldSpares;
+    const totalDrivesNeeded = dataDrives + totalSpares;
+
+    // Distribute drives across chassis
+    const chassisAllocations = [];
+    let remainingDrives = dataDrives;
+    let remainingSpares = totalSpares;
+
+    if (distributionMode === 'balanced') {
+        // Evenly distribute data drives, then spares
+        const chassisCount = chassisBaysList.length;
+        const baseDrivesPerChassis = Math.floor(dataDrives / chassisCount);
+        let extraDrives = dataDrives % chassisCount;
+
+        for (let i = 0; i < chassisCount; i++) {
+            let drivesForChassis = baseDrivesPerChassis + (i < extraDrives ? 1 : 0);
+            // Limit to chassis capacity
+            drivesForChassis = Math.min(drivesForChassis, chassisBaysList[i]);
+            const usable = calculateRAIDCapacity(raid, drivesForChassis, hddTiB);
+            const storage = usable; // For target mode, storage is the usable capacity
+            chassisAllocations.push({
+                bays: chassisBaysList[i],
+                cameras: 0,
+                bandwidth: 0,
+                storage: storage,
+                drivesUsed: drivesForChassis,
+                raidType: raid
+            });
+            remainingDrives -= drivesForChassis;
+        }
+        // Distribute spares (first chassis gets them)
+        if (remainingSpares > 0 && chassisAllocations.length > 0) {
+            chassisAllocations[0].drivesUsed += remainingSpares;
+            chassisAllocations[0].storage = calculateRAIDCapacity(raid, chassisAllocations[0].drivesUsed - remainingSpares, hddTiB);
+        }
+    } else {
+        // Storage‑based: fill chassis sequentially
+        let remaining = target;
+        for (let i = 0; i < chassisBaysList.length && remaining > 0; i++) {
+            const maxDrives = chassisBaysList[i];
+            let drivesForChassis = 0;
+            // Calculate how many drives needed for remaining capacity
+            let neededDrives = Math.ceil(remaining / hddTiB);
+            if (raid === 'RAID1') neededDrives = Math.ceil(neededDrives * 2);
+            else if (raid === 'RAID5') neededDrives += 1;
+            else if (raid === 'RAID6') neededDrives += 2;
+            else if (raid === 'RAID10') {
+                neededDrives = Math.ceil(remaining / (hddTiB * 0.5));
+                neededDrives = Math.max(4, neededDrives);
+                if (neededDrives % 2 !== 0) neededDrives++;
+            }
+            drivesForChassis = Math.min(maxDrives, neededDrives);
+            const usable = calculateRAIDCapacity(raid, drivesForChassis, hddTiB);
+            chassisAllocations.push({
+                bays: chassisBaysList[i],
+                cameras: 0,
+                bandwidth: 0,
+                storage: usable,
+                drivesUsed: drivesForChassis,
+                raidType: raid
+            });
+            remaining -= usable;
+        }
+        // Add spares to the first chassis
+        if (remainingSpares > 0 && chassisAllocations.length > 0) {
+            chassisAllocations[0].drivesUsed += remainingSpares;
+            // Recalculate storage for that chassis (spares don't add capacity)
+            chassisAllocations[0].storage = calculateRAIDCapacity(raid, chassisAllocations[0].drivesUsed - remainingSpares, hddTiB);
+        }
+    }
+
+    // Total drives used across all chassis (including spares)
+    const totalDrivesUsed = chassisAllocations.reduce((sum, ch) => sum + ch.drivesUsed, 0);
+    const usableTotal = chassisAllocations.reduce((sum, ch) => sum + ch.storage, 0);
+    const exceeds = totalDrivesUsed > totalBays;
+
+    // Generate report
+    let report = `[ STORAGE DESIGN REPORT ]
 ═══════════════════════════════════
 📋 MODE: TARGET CAPACITY
 🎯 Target Required: ${target.toFixed(2)} TiB
 
 💾 HARDWARE CONFIGURATION
    RAID Type          : ${raid} (${getRAIDOverheadDescription(raid)})
-   HDD Size           : ${(hdd/0.90949).toFixed(0)} TB (${hdd.toFixed(2)} TiB)
+   HDD Size           : ${hddLabel} TB (${hddTiB.toFixed(2)} TiB)
    Hot Spares         : ${hotSpares}
    Cold Spares        : ${coldSpares}
    
-🔧 DRIVE ALLOCATION
-   Data Drives        : ${drives}
-   Total Drives       : ${totalDrives} / ${totalBays}
+🔧 DRIVE ALLOCATION (Total)
+   Data Drives        : ${dataDrives}
+   Total Drives       : ${totalDrivesUsed} / ${totalBays}
    
 📊 CAPACITY ANALYSIS
-   Raw Capacity       : ${rawTotal.toFixed(2)} TiB (${drives} × ${hdd.toFixed(2)} TiB)
-   Usable (${raid})    : ${usable.toFixed(2)} TiB
+   Usable (${raid})    : ${usableTotal.toFixed(2)} TiB
    Required           : ${target.toFixed(2)} TiB
-   Utilization        : ${((target/usable)*100).toFixed(1)}%
-   ${target <= usable ? '✅ Feasible Configuration' : '⚠️ Insufficient Capacity'}
+   Utilization        : ${((target/usableTotal)*100).toFixed(1)}%
+   ${target <= usableTotal ? '✅ Feasible Configuration' : '⚠️ Insufficient Capacity'}
 
 ${exceeds ? '⚠️ WARNING: More drives needed than available bays!\n' : ''}
 ═══════════════════════════════════`;
-            document.getElementById('summary').innerText = report;
-            
-            const chassisAllocations = [{
-                bays: totalBays,
-                cameras: 0,
-                bandwidth: 0,
-                storage: target,
-                drivesUsed: totalDrives,
-                raidType: raid
-            }];
-            const growth = 0;
-            const vmsOverhead = 0;
-            renderChassisVisualization(chassisAllocations, growth, vmsOverhead, hdd, raid, hotSpares, coldSpares);
-        }
+
+    document.getElementById('summary').innerText = report;
+
+    // Render chassis visualization with per‑chassis spares
+    // For simplicity, we pass the global spares; the visualization will show them only on the first chassis
+    renderChassisVisualization(chassisAllocations, 0, 0, hddTiB, raid, hotSpares, coldSpares);
+		}
         
         function exportReport() {
             const report = document.getElementById('summary').innerText;
