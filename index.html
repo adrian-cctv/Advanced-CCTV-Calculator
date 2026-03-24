@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CCTV Storage Architect | v3.7.1</title>
+    <title>CCTV Storage Architect | v3.8</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700&family=JetBrains+Mono&display=swap');
@@ -174,7 +174,14 @@
             cursor: help;
             border-bottom: 1px dotted #64748b;
         }
-        input[type="range"] {
+        .col-sep {
+            border-left: 1px solid #1e293b;
+        }
+        /* Readonly output cells get a slightly different background */
+        input[readonly] {
+            background: #0a1120 !important;
+            color: inherit;
+        }
             height: 4px;
             -webkit-appearance: none;
             background: #1e293b;
@@ -215,40 +222,65 @@
                 </div>
                 <div>
                     <h1 class="text-3xl font-bold tracking-tighter text-white uppercase">CCTV <span class="text-blue-500">Storage</span> Architect</h1>
-                    <p class="text-[10px] text-slate-500 mono tracking-[0.4em] uppercase">Enterprise Design Engine // v3.7 // </p>
+                    <p class="text-[10px] text-slate-500 mono tracking-[0.4em] uppercase">Enterprise Design Engine // v3.8 // </p>
                 </div>
             </div>
-            <button onclick="exportReport()" class="btn-export text-xs bg-slate-700 hover:bg-slate-600 px-4 py-2 rounded font-bold transition uppercase tracking-wider flex items-center gap-2">
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M12 3v12m0 0-3-3m3 3 3-3M5 21h14"/>
-                </svg>
-                Export Report
-            </button>
+            <div class="flex items-center gap-2">
+                <button onclick="saveDesign()" class="btn-export text-xs px-4 py-2 rounded font-bold transition uppercase tracking-wider flex items-center gap-2" title="Save full design to JSON file">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+                    Save
+                </button>
+                <label class="btn-export text-xs px-4 py-2 rounded font-bold transition uppercase tracking-wider flex items-center gap-2 cursor-pointer" title="Load a previously saved JSON design">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                    Load
+                    <input type="file" accept=".json" onchange="loadDesign(event)" class="hidden">
+                </label>
+                <button onclick="exportReport()" class="btn-export text-xs bg-slate-700 hover:bg-slate-600 px-4 py-2 rounded font-bold transition uppercase tracking-wider flex items-center gap-2">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M12 3v12m0 0-3-3m3 3 3-3M5 21h14"/>
+                    </svg>
+                    Export Report
+                </button>
+            </div>
         </header>
 
         <div class="grid grid-cols-1 xl:grid-cols-12 gap-8">
             <div class="xl:col-span-8 space-y-6">
                 <div class="bg-slate-900/40 p-6 rounded-2xl border border-slate-800 backdrop-blur-md">
                     <div class="flex justify-between items-center mb-6">
-                        <h2 class="text-xs font-bold uppercase tracking-widest text-blue-400">Project Camera Schedule </h2>
+                        <h2 class="text-xs font-bold uppercase tracking-widest text-blue-400">Project Camera Schedule</h2>
                         <button onclick="addRow()" class="text-[10px] bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded font-bold transition uppercase tracking-widest">+ Add Group</button>
                     </div>
                     <div class="overflow-x-auto">
-                        <table class="w-full text-left text-xs">
+                        <table class="w-full text-left text-xs border-separate border-spacing-0">
+                            <colgroup>
+                                <col style="min-width:120px">          <!-- Group -->
+                                <col style="width:52px">               <!-- Qty -->
+                                <col style="width:130px">              <!-- Res/Codec -->
+                                <col style="width:52px">               <!-- FPS -->
+                                <col style="width:52px">               <!-- Days -->
+                                <col style="width:56px">               <!-- Rec % -->
+                                <col style="width:76px">               <!-- Auto Kbit/s -->
+                                <col style="width:100px">              <!-- Manual Kbit/s -->
+                                <col style="width:76px">               <!-- Used Kbit/s -->
+                                <col style="width:64px">               <!-- Mbit/s -->
+                                <col style="width:64px">               <!-- TiB -->
+                                <col style="width:48px">               <!-- Actions -->
+                            </colgroup>
                             <thead class="text-[10px] text-slate-500 uppercase border-b border-slate-800">
                                 <tr>
-                                    <th class="pb-4 px-1">Group</th>
-                                    <th class="pb-4 px-1 w-12 text-center">Qty</th>
-                                    <th class="pb-4 px-1">Res / Codec</th>
-                                    <th class="pb-4 px-1 w-12 text-center">FPS</th>
-                                    <th class="pb-4 px-1 w-12 text-center">Days</th>
-                                    <th class="pb-4 px-1 w-12 text-center">Rec%</th>
-                                    <th class="pb-4 px-1 w-20 text-center">Auto kbps</th>
-                                    <th class="pb-4 px-1 w-20 text-center">Manual kbps</th>
-                                    <th class="pb-4 px-1 w-16 text-center">Used kbps</th>
-                                    <th class="pb-4 px-1 w-16 text-center">Mbps</th>
-                                    <th class="pb-4 px-1 w-16 text-center">TiB</th>
-                                    <th class="pb-4"></th>
+                                    <th class="pb-3 px-2 text-left">Group</th>
+                                    <th class="pb-3 px-1 text-center">Qty</th>
+                                    <th class="pb-3 px-2 text-left">Res / Codec</th>
+                                    <th class="pb-3 px-1 text-center info-icon" title="Frames per second. Auto bitrates are calculated at 15fps baseline and scale linearly.">FPS ⓘ</th>
+                                    <th class="pb-3 px-1 text-center">Days</th>
+                                    <th class="pb-3 px-1 text-center">Rec %</th>
+                                    <th class="pb-3 px-1 text-center text-blue-400/70 col-sep">Auto Kbit/s</th>
+                                    <th class="pb-3 px-1 text-center text-orange-400/70">Manual Kbit/s</th>
+                                    <th class="pb-3 px-1 text-center text-green-400/70">Used Kbit/s</th>
+                                    <th class="pb-3 px-1 text-center col-sep">Mbit/s</th>
+                                    <th class="pb-3 px-1 text-center">TiB</th>
+                                    <th class="pb-3"></th>
                                 </tr>
                             </thead>
                             <tbody id="cameraRows"></tbody>
@@ -257,7 +289,31 @@
                     </div>
                 </div>
 
-                <div class="bg-slate-900/40 p-8 rounded-2xl border border-slate-800">
+                <!-- Bandwidth Utilisation Gauge -->
+                <div class="bg-slate-900/40 px-6 py-4 rounded-2xl border border-slate-800">
+                    <div class="flex items-center justify-between mb-2">
+                        <h2 class="text-xs font-bold uppercase tracking-widest text-blue-400">Network Bandwidth Utilisation</h2>
+                        <div class="flex items-center gap-2">
+                            <span class="text-[9px] text-slate-500 uppercase">Link Capacity</span>
+                            <select id="networkCapacity" onchange="updateBandwidthGauge()" class="p-1 rounded text-[10px]">
+                                <option value="100">100 Mbit/s (Fast Ethernet)</option>
+                                <option value="1000" selected>1 Gbit/s (Gigabit)</option>
+                                <option value="2500">2.5 Gbit/s</option>
+                                <option value="10000">10 Gbit/s</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="relative h-5 bg-slate-800 rounded-full overflow-hidden">
+                        <div id="bwGaugeBar" class="h-full rounded-full transition-all duration-500" style="width:0%"></div>
+                        <span id="bwGaugeLabel" class="absolute inset-0 flex items-center justify-center text-[10px] font-bold mono text-white mix-blend-difference">0 / 1000 Mbit/s (0%)</span>
+                    </div>
+                    <div class="flex justify-between text-[8px] text-slate-600 mt-1">
+                        <span>0%</span>
+                        <span class="text-yellow-600">⚠ 70% caution</span>
+                        <span class="text-red-600">✖ 90% critical</span>
+                        <span>100%</span>
+                    </div>
+                </div>
                     <h2 class="text-xs font-bold uppercase tracking-widest text-blue-400 mb-4 text-center">Chassis Topology</h2>
                     
                     <div class="mb-6">
@@ -385,6 +441,8 @@
                                     <option value="18" selected>18 TB</option>
                                     <option value="20">20 TB</option>
                                     <option value="22">22 TB</option>
+                                    <option value="24">24 TB</option>
+                                    <option value="28">28 TB</option>
                                 </select>
                             </div>
                         </div>
@@ -448,6 +506,8 @@
                                     <option value="18" selected>18 TB</option>
                                     <option value="20">20 TB</option>
                                     <option value="22">22 TB</option>
+                                    <option value="24">24 TB</option>
+                                    <option value="28">28 TB</option>
                                 </select>
                             </div>
                         </div>
@@ -474,14 +534,17 @@
     </div>
 
     <script>
+        // Conversion: 1 TB (SI) = 1000³ / 1024³ TiB
+        const TB_TO_TIB = 0.909495;
+
         // Base bitrate presets (kbps @ 15fps)
         const baseBitrates = {
             '720p-264': 2000, '720p-265': 1000,
             '2mp-264': 4000, '2mp-265': 2000,
             '4mp-264': 7000, '4mp-265': 3500,
             '5mp-264': 8500, '5mp-265': 4200,
-            '6mp-264': 10000, '6mp-265': 5000,
-            '4k-264': 16000, '4k-265': 8000
+            '6mp-264': 12000, '6mp-265': 6000,
+            '4k-264': 20000, '4k-265': 10000
         };
         
         let calcTimeout;
@@ -512,6 +575,17 @@
             
             const autoBitrate = getAutoBitrate(resolution, codec, fps);
             row.querySelector('.auto-kbps').value = autoBitrate;
+            
+            // Colour-code the preset cell based on codec
+            const presetCell = presetSelect.closest('td');
+            if (codec === '265') {
+                presetCell.style.background = 'rgba(74, 222, 128, 0.08)';
+                presetCell.style.borderLeft = '2px solid #4ade80';
+            } else {
+                presetCell.style.background = 'rgba(249, 115, 22, 0.08)';
+                presetCell.style.borderLeft = '2px solid #f97316';
+            }
+            
             updateUsedBitrate(row);
         }
         
@@ -581,9 +655,13 @@
             
             row.className = 'border-b border-slate-800/40 group hover:bg-slate-800/20 transition';
             row.innerHTML = `
-                <td class="py-2 px-1"><input type="text" value="${groupName}" class="p-1 w-full bg-transparent border-none! text-xs"></td>
-                <td class="py-2 px-1"><input type="number" value="${qty}" oninput="updateRowCalculations(this.closest('tr')); debouncedCalc();" class="qty p-1 w-12 text-center rounded text-xs"></td>
+                <td class="py-2 px-2">
+                    <input type="text" value="${groupName}" class="p-1 w-full bg-transparent border-none! text-xs text-slate-200">
+                </td>
                 <td class="py-2 px-1">
+                    <input type="number" value="${qty}" oninput="updateRowCalculations(this.closest('tr')); debouncedCalc();" class="qty p-1 w-full text-center rounded text-xs">
+                </td>
+                <td class="py-2 px-2">
                     <select onchange="updateAutoBitrate(this.closest('tr')); debouncedCalc();" class="preset p-1 w-full rounded text-xs">
                         <optgroup label="🎬 H.265 (High Efficiency - Green)">
                             <option value="720p-265" ${preset === '720p-265' ? 'selected' : ''}>720p</option>
@@ -603,31 +681,66 @@
                         </optgroup>
                     </select>
                 </td>
-                <td class="py-2 px-1"><input type="number" value="${fps}" oninput="updateAutoBitrate(this.closest('tr')); debouncedCalc();" class="fps p-1 w-12 text-center rounded text-xs"></td>
-                <td class="py-2 px-1"><input type="number" value="${days}" oninput="updateRowCalculations(this.closest('tr')); debouncedCalc();" class="days p-1 w-12 text-center rounded text-xs"></td>
-                <td class="py-2 px-1"><input type="number" value="${rec}" oninput="updateRowCalculations(this.closest('tr')); debouncedCalc();" class="rec p-1 w-12 text-center rounded text-xs"></td>
-                <td class="py-2 px-1"><input type="text" value="${autoBitrate}" class="auto-kbps p-1 w-16 text-blue-400 font-bold rounded text-xs bg-slate-800/50" readonly></td>
                 <td class="py-2 px-1">
-                    <div class="flex items-center gap-1">
-                        <input type="checkbox" onchange="toggleManualOverride(this, this.closest('tr'))" class="w-3 h-3">
-                        <input type="number" oninput="updateUsedBitrate(this.closest('tr')); debouncedCalc();" class="manual-kbps p-1 w-16 text-orange-400 rounded text-xs" disabled placeholder="Auto">
+                    <input type="number" value="${fps}" oninput="updateAutoBitrate(this.closest('tr')); debouncedCalc();" class="fps p-1 w-full text-center rounded text-xs">
+                </td>
+                <td class="py-2 px-1">
+                    <input type="number" value="${days}" oninput="updateRowCalculations(this.closest('tr')); debouncedCalc();" class="days p-1 w-full text-center rounded text-xs">
+                </td>
+                <td class="py-2 px-1">
+                    <input type="number" value="${rec}" oninput="updateRowCalculations(this.closest('tr')); debouncedCalc();" class="rec p-1 w-full text-center rounded text-xs">
+                </td>
+                <td class="py-2 px-1 col-sep">
+                    <input type="text" value="${autoBitrate}" class="auto-kbps p-1 w-full text-center text-blue-400 font-bold rounded text-xs bg-slate-800/50" readonly>
+                </td>
+                <td class="py-2 px-1">
+                    <div class="flex items-center gap-1 w-full">
+                        <input type="checkbox" onchange="toggleManualOverride(this, this.closest('tr'))" class="w-3 h-3 flex-shrink-0" title="Enable manual override">
+                        <input type="number" oninput="updateUsedBitrate(this.closest('tr')); debouncedCalc();" class="manual-kbps p-1 w-full text-center text-orange-400 rounded text-xs" disabled placeholder="Auto">
                     </div>
                 </td>
-                <td class="py-2 px-1"><input type="text" value="${usedKbps}" class="used-kbps p-1 w-16 text-green-400 font-bold rounded text-xs bg-slate-800/50" readonly>
-                <td class="py-2 px-1 text-center text-green-400 font-mono text-xs"><span class="group-mbps">${mbps.toFixed(1)}</span>
-                <td class="py-2 px-1 text-center text-yellow-400 font-mono text-xs"><span class="group-tib">${tib.toFixed(2)}</span>
-                <td class="py-2 px-1"><button onclick="this.closest('tr').remove(); debouncedCalc();" class="text-red-900 hover:text-red-500 opacity-50 hover:opacity-100 text-lg font-bold">×</button>
+                <td class="py-2 px-1">
+                    <input type="text" value="${usedKbps}" class="used-kbps p-1 w-full text-center text-green-400 font-bold rounded text-xs bg-slate-800/50" readonly>
+                </td>
+                <td class="py-2 px-1 text-center text-green-400 font-mono text-xs font-bold col-sep">
+                    <span class="group-mbps">${mbps.toFixed(1)}</span>
+                </td>
+                <td class="py-2 px-1 text-center text-yellow-400 font-mono text-xs font-bold">
+                    <span class="group-tib">${tib.toFixed(2)}</span>
+                </td>
+                <td class="py-2 px-1">
+                    <div class="flex items-center justify-center gap-1">
+                        <button onclick="duplicateRow(this.closest('tr'))" title="Duplicate row" class="text-slate-600 hover:text-blue-400 opacity-50 hover:opacity-100 transition text-sm leading-none">⧉</button>
+                        <button onclick="this.closest('tr').remove(); debouncedCalc();" title="Delete row" class="text-red-900 hover:text-red-500 opacity-50 hover:opacity-100 text-base font-bold leading-none">×</button>
+                    </div>
+                </td>
             `;
             tbody.appendChild(row);
             
             const manualInput = row.querySelector('.manual-kbps');
             manualInput.setAttribute('data-override', 'false');
             
+            // Apply codec cell highlight on creation
+            updateAutoBitrate(row);
+            
             return row;
         }
         
         function addRow() {
             createRow('New Group', 10, '2mp-265', 15, 31, 100);
+            debouncedCalc();
+        }
+        
+        function duplicateRow(sourceRow) {
+            const groupName = sourceRow.querySelector('input[type="text"]').value + ' (Copy)';
+            const qty = parseFloat(sourceRow.querySelector('.qty').value) || 10;
+            const preset = sourceRow.querySelector('.preset').value;
+            const fps = parseFloat(sourceRow.querySelector('.fps').value) || 15;
+            const days = parseFloat(sourceRow.querySelector('.days').value) || 31;
+            const rec = parseFloat(sourceRow.querySelector('.rec').value) || 100;
+            const newRow = createRow(groupName, qty, preset, fps, days, rec);
+            // Insert immediately after source row
+            sourceRow.after(newRow);
             debouncedCalc();
         }
         
@@ -649,15 +762,15 @@
             const tfoot = document.getElementById('cameraSummary');
             if (tfoot) {
                 tfoot.innerHTML = `
-                    <tr class="border-t-2 border-blue-500">
-                        <td colspan="9" class="py-3 px-1 text-right font-bold text-blue-400">TOTALS:</td>
-                        <td class="py-3 px-1 text-center font-mono text-green-400 font-bold">${totalMbps.toFixed(1)} Mbps</td>
-                        <td class="py-3 px-1 text-center font-mono text-yellow-400 font-bold">${totalTiB.toFixed(2)} TiB</td>
+                    <tr class="border-t-2 border-blue-500/50 bg-slate-900/60">
+                        <td colspan="9" class="py-3 px-2 text-right text-[10px] font-bold text-slate-400 uppercase tracking-widest">Totals</td>
+                        <td class="py-3 px-1 text-center font-mono text-xs text-green-400 font-bold">${totalMbps.toFixed(1)}</td>
+                        <td class="py-3 px-1 text-center font-mono text-xs text-yellow-400 font-bold">${totalTiB.toFixed(2)}</td>
                         <td class="py-3 px-1"></td>
                     </tr>
-                    <tr class="text-[9px] text-slate-500">
-                        <td colspan="12" class="py-2 px-1 text-center">
-                            📊 Total Cameras: ${totalCameras} | Total Bandwidth: ${totalMbps.toFixed(1)} Mbps | Raw Storage: ${totalTiB.toFixed(2)} TiB
+                    <tr class="text-[9px] text-slate-500 bg-slate-900/30">
+                        <td colspan="12" class="py-2 px-2 text-center">
+                            📊 ${totalCameras} cameras &nbsp;·&nbsp; ${totalMbps.toFixed(1)} Mbit/s &nbsp;·&nbsp; ${totalTiB.toFixed(2)} TiB raw storage
                         </td>
                     </tr>
                 `;
@@ -706,16 +819,19 @@
         }
         
         function calculateRAIDCapacity(raid, driveCount, driveSizeTiB) {
+            if (driveCount <= 0) return 0;
             if (raid === 'JBOD') return driveCount * driveSizeTiB;
             if (raid === 'RAID0') return driveCount * driveSizeTiB;
-            if (raid === 'RAID1') return driveCount === 0 ? 0 : driveSizeTiB;
-            if (raid === 'RAID5') return (driveCount - 1) * driveSizeTiB;
-            if (raid === 'RAID6') return (driveCount - 2) * driveSizeTiB;
+            if (raid === 'RAID1') return Math.floor(driveCount / 2) * driveSizeTiB;  // Fixed: supports multi-pair RAID1
+            if (raid === 'RAID5') return Math.max(0, driveCount - 1) * driveSizeTiB;
+            if (raid === 'RAID6') return Math.max(0, driveCount - 2) * driveSizeTiB;
             if (raid === 'RAID10') return Math.floor(driveCount / 2) * driveSizeTiB;
             return 0;
         }
         
-        function calculateDrivesForCapacity(targetTiB, raid, driveSizeTiB, maxBays) {
+        // Single authoritative function for drive count calculation — used by all calc paths
+        function calculateDrivesForCapacity(targetTiB, raid, driveSizeTiB) {
+            if (targetTiB <= 0) return 0;
             if (raid === 'JBOD' || raid === 'RAID0') return Math.ceil(targetTiB / driveSizeTiB);
             if (raid === 'RAID1') return Math.ceil(targetTiB / driveSizeTiB) * 2;
             if (raid === 'RAID5') return Math.ceil(targetTiB / driveSizeTiB) + 1;
@@ -798,7 +914,7 @@
                         </div>
                         <div class="flex justify-between">
                             <span class="text-slate-400">Bandwidth:</span>
-                            <span class="font-mono text-green-400">${ch.bandwidth.toFixed(1)} Mbps</span>
+                            <span class="font-mono text-green-400">${ch.bandwidth.toFixed(1)} Mbit/s</span>
                         </div>
                         <div class="border-t border-slate-700 my-2"></div>
                         <div class="storage-metric">
@@ -814,7 +930,7 @@
                         <div class="storage-metric mt-1">
                             <div class="flex justify-between">
                                 <span class="text-slate-400">💾 Raw Provided:</span>
-                                <span class="font-mono metric-good">${rawProvided.toFixed(2)} TiB</span>
+                                <span class="font-mono metric-good">${rawProvided.toFixed(2)} TiB <span class="text-slate-500">(${(rawProvided / TB_TO_TIB).toFixed(2)} TB)</span></span>
                             </div>
                             <div class="flex justify-between text-[8px] text-slate-500 pl-2">
                                 <span>└─ ${ch.drivesUsed - hotSpares - coldSpares} data + ${hotSpares} hot + ${coldSpares} cold drives</span>
@@ -823,7 +939,7 @@
                         <div class="storage-metric mt-1">
                             <div class="flex justify-between">
                                 <span class="text-slate-400">✅ Usable (${raid}):</span>
-                                <span class="font-mono ${usableColor}">${usableProvided.toFixed(2)} TiB</span>
+                                <span class="font-mono ${usableColor}">${usableProvided.toFixed(2)} TiB <span class="text-slate-500">(${(usableProvided / TB_TO_TIB).toFixed(2)} TB)</span></span>
                             </div>
                             <div class="flex justify-between text-[8px] text-slate-500 pl-2">
                                 <span>└─ ${getRAIDOverheadDescription(raid)}</span>
@@ -854,6 +970,7 @@
             const summary = updateCameraSummary();
             if (designMode === 'camera') calcCameraMode(summary);
             else calcTargetMode();
+            updateBandwidthGauge();
         }
         
         function calcCameraMode(summary) {
@@ -867,29 +984,13 @@
             const targetTiB = totalTiB * (1 + growth/100) * (1 + vmsOverheadPercent/100);
             const raid = document.getElementById('raidLevel').value;
             const hddLabel = parseFloat(document.getElementById('hddSize').value);
-            const binaryHdd = hddLabel * 0.90949;
+            const binaryHdd = hddLabel * TB_TO_TIB;
             const chassisBaysList = getChassisBays();
             const totalBays = chassisBaysList.reduce((a,b) => a + b, 0);
             
-            let dataDrives, parity;
-            if (raid === 'JBOD' || raid === 'RAID0') { 
-                dataDrives = Math.ceil(targetTiB / binaryHdd); 
-                parity = 0; 
-            }
-            else if (raid === 'RAID1') {
-                dataDrives = Math.ceil(targetTiB / binaryHdd) * 2;
-                parity = dataDrives / 2;
-            }
-            else if (raid === 'RAID10') { 
-                dataDrives = Math.max(4, Math.ceil(targetTiB / (binaryHdd * 0.5))); 
-                if(dataDrives%2) dataDrives++; 
-                parity = dataDrives/2; 
-            }
-            else { 
-                parity = raid === 'RAID6' ? 2 : 1; 
-                dataDrives = Math.ceil(targetTiB / binaryHdd); 
-            }
-            const totalDrives = dataDrives + (raid === 'RAID10' ? 0 : parity) + hotSpares + coldSpares;
+            // Use unified drive calc — fixes RAID5/6 parity double-count
+            const dataDrives = calculateDrivesForCapacity(targetTiB, raid, binaryHdd);
+            const totalDrives = dataDrives + hotSpares + coldSpares;
             
             const chassisAllocations = [];
             const distMode = document.getElementById('distributionMode').value;
@@ -901,11 +1002,8 @@
                     const cams = Math.min(camsPerChassis, remainingCams);
                     const storageShare = (cams / totalCameras) * totalTiB;
                     const bwShare = (cams / totalCameras) * totalMbps;
-                    let drivesNeeded = Math.ceil(storageShare * (1+growth/100) * (1+vmsOverheadPercent/100) / binaryHdd);
-                    if (raid === 'RAID1') drivesNeeded = Math.ceil(drivesNeeded * 2);
-                    else if (raid === 'RAID5') drivesNeeded += 1;
-                    else if (raid === 'RAID6') drivesNeeded += 2;
-                    else if (raid === 'RAID10') drivesNeeded = Math.max(4, Math.ceil(drivesNeeded * 2));
+                    const shareTarget = storageShare * (1 + growth/100) * (1 + vmsOverheadPercent/100);
+                    let drivesNeeded = calculateDrivesForCapacity(shareTarget, raid, binaryHdd);
                     drivesNeeded += Math.ceil(hotSpares / chassisBaysList.length) + Math.ceil(coldSpares / chassisBaysList.length);
                     chassisAllocations.push({ 
                         bays: chassisBaysList[i], 
@@ -920,20 +1018,17 @@
             } else {
                 let remaining = targetTiB;
                 for (let i = 0; i < chassisBaysList.length && remaining > 0; i++) {
-                    let drives = Math.min(chassisBaysList[i], Math.ceil(remaining / binaryHdd));
-                    if (raid === 'RAID1') drives = Math.ceil(drives * 2);
-                    else if (raid === 'RAID5') drives += 1;
-                    else if (raid === 'RAID6') drives += 2;
-                    else if (raid === 'RAID10') drives = Math.max(4, Math.ceil(drives * 2));
+                    let drives = Math.min(chassisBaysList[i], calculateDrivesForCapacity(remaining, raid, binaryHdd));
                     drives += Math.ceil(hotSpares / chassisBaysList.length) + Math.ceil(coldSpares / chassisBaysList.length);
+                    drives = Math.min(drives, chassisBaysList[i]);
                     const usable = calculateRAIDCapacity(raid, drives - hotSpares - coldSpares, binaryHdd);
-                    const cams = Math.round((usable / targetTiB) * totalCameras);
+                    const cams = totalCameras > 0 ? Math.round((usable / targetTiB) * totalCameras) : 0;
                     chassisAllocations.push({ 
                         bays: chassisBaysList[i], 
                         cameras: cams, 
-                        bandwidth: (usable/targetTiB)*totalMbps, 
-                        storage: (usable/targetTiB)*totalTiB, 
-                        drivesUsed: Math.min(drives, chassisBaysList[i]), 
+                        bandwidth: totalMbps > 0 ? (usable/targetTiB)*totalMbps : 0, 
+                        storage: totalTiB > 0 ? (usable/targetTiB)*totalTiB : 0, 
+                        drivesUsed: drives, 
                         raidType: raid 
                     });
                     remaining -= usable;
@@ -979,10 +1074,10 @@ ${exceeds ? '⚠️ WARNING: More drives needed than available bays!\n' : ''}
         
         function calcTargetMode() {
     let target = parseFloat(document.getElementById('targetCapacity').value) || 0;
-    if (document.getElementById('targetUnit').value === 'TB') target *= 0.90949;
+    if (document.getElementById('targetUnit').value === 'TB') target *= TB_TO_TIB;
     const raid = document.getElementById('targetRaidLevel').value;
     const hddLabel = parseFloat(document.getElementById('targetHddSize').value);
-    const hddTiB = hddLabel * 0.90949;
+    const hddTiB = hddLabel * TB_TO_TIB;
     const hotSpares = parseInt(document.getElementById('targetHotSpares').value) || 0;
     const coldSpares = parseInt(document.getElementById('targetColdSpares').value) || 0;
     const chassisBaysList = getChassisBays();
@@ -1128,6 +1223,121 @@ ${exceeds ? '⚠️ WARNING: More drives needed than available bays!\n' : ''}
             setTimeout(() => { btn.innerHTML = originalText; }, 2000);
         }
         
+        function updateBandwidthGauge() {
+            const totalMbps = Array.from(document.querySelectorAll('#cameraRows tr'))
+                .reduce((sum, row) => sum + (parseFloat(row.getAttribute('data-mbps')) || 0), 0);
+            const capacity = parseFloat(document.getElementById('networkCapacity')?.value) || 1000;
+            const pct = Math.min((totalMbps / capacity) * 100, 100);
+            const bar = document.getElementById('bwGaugeBar');
+            const label = document.getElementById('bwGaugeLabel');
+            if (!bar || !label) return;
+            bar.style.width = pct + '%';
+            if (pct >= 90) bar.className = 'h-full rounded-full transition-all duration-500 bg-red-500';
+            else if (pct >= 70) bar.className = 'h-full rounded-full transition-all duration-500 bg-yellow-500';
+            else bar.className = 'h-full rounded-full transition-all duration-500 bg-green-500';
+            label.textContent = `${totalMbps.toFixed(1)} / ${capacity} Mbit/s (${pct.toFixed(1)}%)`;
+        }
+
+        function saveDesign() {
+            const rows = [];
+            document.querySelectorAll('#cameraRows tr').forEach(row => {
+                const manualInput = row.querySelector('.manual-kbps');
+                rows.push({
+                    group:   row.querySelector('input[type="text"]').value,
+                    qty:     row.querySelector('.qty').value,
+                    preset:  row.querySelector('.preset').value,
+                    fps:     row.querySelector('.fps').value,
+                    days:    row.querySelector('.days').value,
+                    rec:     row.querySelector('.rec').value,
+                    manualOverride: manualInput.getAttribute('data-override') === 'true',
+                    manualKbps: manualInput.value || ''
+                });
+            });
+            const design = {
+                version: '3.8',
+                saved: new Date().toISOString(),
+                mode: designMode,
+                globalAdjustment,
+                chassisCount: document.getElementById('chassisCount').value,
+                chassisBays: document.getElementById('chassisBays').value,
+                distributionMode: document.getElementById('distributionMode').value,
+                raidLevel: document.getElementById('raidLevel').value,
+                hddSize: document.getElementById('hddSize').value,
+                growth: document.getElementById('growth').value,
+                vmsOverhead: document.getElementById('vmsOverhead').value,
+                hotSpares: document.getElementById('hotSpares').value,
+                coldSpares: document.getElementById('coldSpares').value,
+                targetCapacity: document.getElementById('targetCapacity').value,
+                targetUnit: document.getElementById('targetUnit').value,
+                targetRaidLevel: document.getElementById('targetRaidLevel').value,
+                targetHddSize: document.getElementById('targetHddSize').value,
+                targetHotSpares: document.getElementById('targetHotSpares').value,
+                targetColdSpares: document.getElementById('targetColdSpares').value,
+                networkCapacity: document.getElementById('networkCapacity')?.value || '1000',
+                rows
+            };
+            const blob = new Blob([JSON.stringify(design, null, 2)], { type: 'application/json' });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = `cctv_design_${new Date().toISOString().slice(0,10)}.json`;
+            a.click();
+            URL.revokeObjectURL(a.href);
+        }
+
+        function loadDesign(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                try {
+                    const d = JSON.parse(e.target.result);
+                    // Restore settings
+                    if (d.chassisCount) document.getElementById('chassisCount').value = d.chassisCount;
+                    if (d.chassisBays) document.getElementById('chassisBays').value = d.chassisBays;
+                    if (d.distributionMode) document.getElementById('distributionMode').value = d.distributionMode;
+                    if (d.raidLevel) document.getElementById('raidLevel').value = d.raidLevel;
+                    if (d.hddSize) document.getElementById('hddSize').value = d.hddSize;
+                    if (d.growth) document.getElementById('growth').value = d.growth;
+                    if (d.vmsOverhead) document.getElementById('vmsOverhead').value = d.vmsOverhead;
+                    if (d.hotSpares !== undefined) document.getElementById('hotSpares').value = d.hotSpares;
+                    if (d.coldSpares !== undefined) document.getElementById('coldSpares').value = d.coldSpares;
+                    if (d.targetCapacity) document.getElementById('targetCapacity').value = d.targetCapacity;
+                    if (d.targetUnit) document.getElementById('targetUnit').value = d.targetUnit;
+                    if (d.targetRaidLevel) document.getElementById('targetRaidLevel').value = d.targetRaidLevel;
+                    if (d.targetHddSize) document.getElementById('targetHddSize').value = d.targetHddSize;
+                    if (d.targetHotSpares !== undefined) document.getElementById('targetHotSpares').value = d.targetHotSpares;
+                    if (d.targetColdSpares !== undefined) document.getElementById('targetColdSpares').value = d.targetColdSpares;
+                    if (d.networkCapacity && document.getElementById('networkCapacity')) document.getElementById('networkCapacity').value = d.networkCapacity;
+                    if (d.globalAdjustment) {
+                        globalAdjustment = d.globalAdjustment;
+                        document.getElementById('globalAdjust').value = d.globalAdjustment;
+                        document.getElementById('adjustValue').textContent = Math.round(d.globalAdjustment * 100) + '%';
+                    }
+                    // Restore camera rows
+                    document.getElementById('cameraRows').innerHTML = '';
+                    (d.rows || []).forEach(r => {
+                        const row = createRow(r.group, r.qty, r.preset, r.fps, r.days, r.rec);
+                        if (r.manualOverride) {
+                            const cb = row.querySelector('input[type="checkbox"]');
+                            const mi = row.querySelector('.manual-kbps');
+                            cb.checked = true;
+                            mi.setAttribute('data-override', 'true');
+                            mi.disabled = false;
+                            mi.value = r.manualKbps;
+                            updateUsedBitrate(row);
+                        }
+                    });
+                    if (d.mode) setDesignMode(d.mode);
+                    calc();
+                    alert(`Design loaded: ${d.rows?.length || 0} camera groups restored.`);
+                } catch(err) {
+                    alert('Failed to load design file. Please check it is a valid CCTV Architect JSON.');
+                }
+            };
+            reader.readAsText(file);
+            event.target.value = '';
+        }
+
         function initialize() {
             createRow('Entrance Lobby', 8, '4mp-265', 15, 31, 100);
             createRow('Parking Lot', 12, '2mp-265', 20, 31, 100);
