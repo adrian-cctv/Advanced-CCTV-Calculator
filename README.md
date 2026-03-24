@@ -1,5 +1,5 @@
 
-# 🛡️ CCTV Storage Architect v3.7
+# 🛡️ CCTV Storage Architect v3.8
 > **Enterprise Storage & Design Utilities for the Security Industry.**
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
