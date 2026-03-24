@@ -19,6 +19,7 @@ Most storage calculators overlook the **Binary Gap**, **FPS scaling**, and **phy
 * **🖥️ Multi-Chassis Visualizer:** Plan across multiple servers with mixed bay configurations (e.g., 24-bay + 16-bay + 12-bay).
 * **📊 VMS Overhead:** Configurable buffer (2-12%) for database indexing, metadata, and AI analytics.
 * **🏗️ RAID Set Planning:** Full RAID support including JBOD, RAID0, RAID1, RAID5, RAID6, and RAID10.
+* **🏗️ Distribution Logic:** Choose between Balanced (equal load) or Storage-Based (fill-first) drive allocation across chassis.
 * **💾 Spare Drive Management:** Add hot spares (active failover) and cold spares (offline replacements).
 * **🎯 Dual Design Modes:** 
   - **Camera-Based:** Design from camera schedule to storage requirements
@@ -29,6 +30,7 @@ Most storage calculators overlook the **Binary Gap**, **FPS scaling**, and **phy
 * **🏭 Vendor Adjustment:** Global slider with manufacturer reference guide (Axis: 0.65x, Hikvision: 1.0x, Avigilon: 1.2x).
 * **✏️ Manual Override:** Per-camera manual bitrate override with checkbox toggle.
 * **📊 Per-Chassis Metrics:** Shows Required (with growth+VMS), Raw Provided, and Usable (after RAID).
+* **🚦 Bandwidth Gauge:** Real-time network utilization tracking with capacity presets from 100Mb to 10Gb.
 * **🎨 Color-Coded Codecs:** H.265 options in green, H.264 in orange for quick identification.
 * **📄 Export Reports:** One-click report export as `.txt` file with timestamp.
 
@@ -45,7 +47,7 @@ Most storage calculators overlook the **Binary Gap**, **FPS scaling**, and **phy
 
 2. **Configure Infrastructure:**
    - Select **RAID Type** (JBOD, RAID0, RAID1, RAID5, RAID6, RAID10)
-   - Choose **HDD Size** (6TB to 22TB)
+   - Choose **HDD Size** (6TB to 28TB)
    - Set **Growth %** (10% recommended)
    - Set **VMS Overhead %** (5% standard, 8-12% for AI systems)
    - Configure **Hot Spares** and **Cold Spares**
@@ -69,6 +71,7 @@ Most storage calculators overlook the **Binary Gap**, **FPS scaling**, and **phy
    - **Camera Schedule:** View per-group Mbps and TiB with totals
    - **Chassis Topology:** See drive allocation, storage metrics, and color-coded drives
    - **Infrastructure Summary:** Complete report with recommendations
+   - **Save JSON** Save JSON for future use
 
 ### Manual Bitrate Override
 
@@ -112,7 +115,15 @@ For cameras with specific manufacturer bitrate specifications:
 
 ## 📋 Version History
 
-### v3.7 (Current)
+### v3.8 (Current)
+
+- Added Save/Load functionality via JSON files.
+- Expanded HDD support to 24TB and 28TB.
+- Implemented Distribution Modes (Balanced vs. Storage-Based).
+- Updated RAID 1 logic to support multi-pair mirroring.
+- Enhanced Network Bandwidth Gauge with 2.5G and 10G presets.
+
+### v3.7
 - Added RAID1 (Mirror) support
 - Added Hot and Cold spare drives
 - Fixed dropdown selection colors (green/orange)
@@ -170,7 +181,7 @@ For cameras with specific manufacturer bitrate specifications:
 - **RAID10:** Mirror + Stripe, 50% capacity
 
 ### Supported HDD Sizes
-- 6TB, 8TB, 10TB, 12TB, 14TB, 16TB, 18TB, 20TB, 22TB
+- 6TB, 8TB, 10TB, 12TB, 14TB, 16TB, 18TB, 20TB, 22TB, 24TB, 28TB
 
 ### Supported Resolutions
 - 720p, 2MP (1080p), 4MP (1440p), 5MP, 6MP, 4K (8MP)
